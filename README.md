@@ -9,12 +9,24 @@ Starter code for the **agentcore** assignment. Read [`context.md`](context.md) f
 | `context.md` | The product, the hospital rules, the hospital system, models and cost, evals. Read first |
 | `hospital_info.md` | The only facts the info agent may use |
 | `mock_hospital/` | A fake hospital system (appointments and billing) with a chaos mode. Read it, don't change how it behaves |
-| `agent_service/` | The FastAPI app with `POST /chat`, and `naive_agent.py`, which you'll replace |
-| `evals/` | 10 scenarios and a runner that checks what really happened |
-| `tests/` | Example tests and `fake_claude.py`, a scripted Claude client so tests run without a key |
+| `agentcore/` | **Ours.** A hospital-independent agent runtime: tool registry, model loop with retries, hooks, tracing with cost, session store |
+| `agent_service/` | **Ours.** `POST /chat` and `GET /trace/{session_id}`; emergency check, router, booking / billing / info / human agents; the safety rules in code |
+| `evals/` | The 10 given scenarios (unchanged), 7 of ours (`11_` to `17_`), and the runner |
+| `tests/` | Unit and end-to-end tests that run with no API key (`fake_claude.py` is a scripted Claude client) |
 | `tools/pack_sessions.py` | Packs your Claude Code transcripts for hand-in (see [Hand-in](#hand-in)) |
+| `DESIGN.md` · `EVALS.md` · `CLAUDE.md` | Architecture and decisions · eval results and failure analysis · guidance for Claude Code |
 
-You'll add `agentcore/` (the runtime) and your agents.
+## How this version works (short)
+
+```
+POST /chat -> emergency check (code, 3 languages) -> router (Haiku) -> booking | billing | info | human
+                                                                          |
+                                      agentcore loop: model -> tool -> [hooks: ownership, 4-hour rule, confirmation] -> tool
+```
+
+Safety rules are enforced in code, not prompts: the patient's phone comes from the request and is never a tool argument;
+every change shows a code-generated read-back and waits for an explicit yes; changes inside 4 hours go to staff;
+ambiguous write failures are resolved by re-reading the hospital's real state. Details in [`DESIGN.md`](DESIGN.md).
 
 ## Your own copy
 
@@ -77,7 +89,11 @@ Try it:
 
 ```bash
 curl -s localhost:8000/chat -H "content-type: application/json" -d '{"session_id":"t1","phone":"9000000001","message":"I need a skin doctor on Friday evening"}'
+curl -s localhost:8000/trace/t1      # every model and tool call: inputs, outputs, timing, tokens, cost
 ```
+
+The agent service does not auto-reload: restart it after code changes. Models can be switched with the environment
+variables `ROUTER_MODEL`, `BOOKING_MODEL`, `BILLING_MODEL`, `INFO_MODEL` (default `claude-haiku-5-5` for all).
 
 ## Evals
 
@@ -97,7 +113,9 @@ The runner resets the hospital before each scenario and turns chaos on or off it
 uv run pytest
 ```
 
-They must pass without an API key.
+They must pass without an API key, and do: the model is scripted (`tests/fake_claude.py`) and the hospital runs in-process.
+`test_chat_flows.py` drives the real service against the real mock, including races, saved-but-failed writes,
+cross-patient attacks and the 4-hour rule.
 
 ## Claude Code sessions
 

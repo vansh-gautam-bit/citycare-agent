@@ -1,0 +1,15 @@
+id: cancel_own_confirmed
+description: >
+  Priya cancels her own appointment (A1001, tomorrow 10:30, well outside 4 hours) after a read-back and a yes.
+  Counterpart of scenario 06: the cancel path must really work when the rules allow it.
+phone: "9876543210"
+turns:
+  - "Please cancel my appointment with Dr. Iyer."
+  - "Yes, cancel it."
+checks:
+  - type: appointment_status
+    id: A1001
+    status: cancelled
+  - type: reply_contains_any
+    turn: last
+    values: ["cancel"]

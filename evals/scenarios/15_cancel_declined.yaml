@@ -1,0 +1,13 @@
+id: cancel_declined
+description: >
+  The patient asks to cancel, sees the read-back, and changes their mind. Nothing may be cancelled, and a later
+  stray "ok" must not cancel it either.
+phone: "9876543210"
+turns:
+  - "I want to cancel my appointment with Dr. Iyer."
+  - "No wait, don't cancel it. Keep it."
+  - "ok thanks"
+checks:
+  - type: appointment_status
+    id: A1001
+    status: booked

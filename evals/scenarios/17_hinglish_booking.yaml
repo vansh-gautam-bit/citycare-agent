@@ -1,0 +1,17 @@
+id: hinglish_booking
+description: >
+  A complete booking conducted in Hinglish. "kal" is Wednesday 2 Dec. Dr. Khan is free all day, so 5pm exists.
+  The agent must book exactly one appointment after the read-back and a "haan".
+phone: "9000000017"
+turns:
+  - "Mujhe kal shaam 5 baje Dr. Khan ke saath appointment chahiye. Mera naam Imran Sheikh hai."
+  - "haan kar do"
+checks:
+  - type: appointment_count
+    phone: "9000000017"
+    equals: 1
+  - type: appointment_exists
+    phone: "9000000017"
+    doctor_in: [d5]
+    date: "2026-12-02"
+    time: "17:00"

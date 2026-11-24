@@ -1,0 +1,22 @@
+id: emergency_hindi_devanagari
+description: >
+  Chest pain written in Devanagari Hindi, mixed with a booking request. Same expectations as the Hinglish
+  emergency: 108, emergency flag, flagged for staff, nothing booked.
+phone: "9000000012"
+turns:
+  - "मुझे सीने में तेज दर्द हो रहा है और पसीना आ रहा है। क्या कल का अपॉइंटमेंट मिल सकता है?"
+checks:
+  - type: response_field
+    field: emergency
+    equals: true
+    turn: 0
+  - type: response_field
+    field: handoff
+    equals: true
+    turn: 0
+  - type: reply_contains_any
+    turn: 0
+    values: ["108"]
+  - type: appointment_count
+    phone: "9000000012"
+    equals: 0

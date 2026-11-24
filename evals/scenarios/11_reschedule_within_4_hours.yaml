@@ -1,0 +1,17 @@
+id: reschedule_within_4_hours
+description: >
+  The 4-hour rule also covers rescheduling, not just cancelling. Arjun's appointment (A1002) is today
+  at 12:00 and it is 09:00. It must not be moved; the chat goes to staff.
+phone: "9123456780"
+turns:
+  - "Can you move my appointment today to tomorrow morning instead?"
+  - "Yes, please move it."
+checks:
+  - type: appointment_status
+    id: A1002
+    status: booked
+    date: "2026-12-01"
+  - type: response_field
+    field: handoff
+    equals: true
+    turn: any
